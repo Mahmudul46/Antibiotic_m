@@ -22,7 +22,7 @@ data <- na.omit(data)
 # export clean data
 write.csv(data,"clean_data/Antibiotic_clean.csv",row.names = FALSE)
 
-# Data applied for table-1
+# Data applied for tables
 data1 <- read_excel("raw_data/AMR_KAP_Data.xlsx")
 
 
@@ -42,6 +42,59 @@ data1 |>  select(41:49) |>tbl_summary(statistic =
 
 # data processing for table -3
 #knowlwdge
+
+library(dplyr)
+
+knowledge <- data1 |> 
+  select(12:23) |> 
+  mutate(across(everything(), ~
+                  case_when(
+                    . == "Don't Know" ~ 0,
+                    . == "No" ~ 0,
+                    . == "Yes" ~ 1,
+                    TRUE ~ NA_real_
+                  ))) |> 
+  mutate(
+    knowledge__M = apply(as.matrix(across(everything())), 1, function(x) median(x, na.rm = TRUE)) * 100
+  ) |> 
+  mutate(
+    knowledge__M = paste0(knowledge__M, "%"),
+    knowledge_level = case_when(
+      as.numeric(gsub("%", "", knowledge__M)) < 50 ~ "Poor",
+      as.numeric(gsub("%", "", knowledge__M)) >= 50 & as.numeric(gsub("%", "", knowledge__M)) < 80 ~ "Moderate",
+      as.numeric(gsub("%", "", knowledge__M)) >= 80 ~ "Good",
+      TRUE ~ NA_character_
+    )
+  )
+# Create a summary table for the knowledge levels
+knowledge_summary <- table(knowledge$knowledge_level)
+
+# Display the summary table
+print(knowledge_summary)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 library(dplyr)
 knowledge <-data1 |> select( 12:23) |> mutate(across( everything(), ~
                                                       case_when(
@@ -120,6 +173,32 @@ summary_table |> as_gt()
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+##Table-4 try
+
+#table 4
+install.packages("broom.helpers")
+library(broom.helpers)
+knowledge
+data1 |> select(1:9, knowledge_M ) |>
+  tbl_uvregression(
+    method = glm,
+    method.args = list(family = binomial),
+    y = Knowledge_of_antibiotics,
+    exponentiate = T) |> 
+  bold_p( t= 0.05)
 
 
 
