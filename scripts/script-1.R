@@ -32,68 +32,22 @@ data1 |> select(1:11) |> tbl_summary(statistic =
                     "{mean} ± {sd}")) |> 
   as_gt() |> gtsave("tables/table1.docx")
 
-# table-2 + Export
 
+
+# table-2 + Export
 data1 |>  select(41:49) |>tbl_summary(statistic = 
                       list(all_continuous()~
                       "{mean} ± {sd}")) |> 
   as_gt() |> gtsave("tables/table2.docx")
 
 
+
+
+
 # data processing for table -3
-#knowlwdge
-
-library(dplyr)
-
-knowledge <- data1 |> 
-  select(12:23) |> 
-  mutate(across(everything(), ~
-                  case_when(
-                    . == "Don't Know" ~ 0,
-                    . == "No" ~ 0,
-                    . == "Yes" ~ 1,
-                    TRUE ~ NA_real_
-                  ))) |> 
-  mutate(
-    knowledge__M = apply(as.matrix(across(everything())), 1, function(x) median(x, na.rm = TRUE)) * 100
-  ) |> 
-  mutate(
-    knowledge__M = paste0(knowledge__M, "%"),
-    knowledge_level = case_when(
-      as.numeric(gsub("%", "", knowledge__M)) < 50 ~ "Poor",
-      as.numeric(gsub("%", "", knowledge__M)) >= 50 & as.numeric(gsub("%", "", knowledge__M)) < 80 ~ "Moderate",
-      as.numeric(gsub("%", "", knowledge__M)) >= 80 ~ "Good",
-      TRUE ~ NA_character_
-    )
-  )
-# Create a summary table for the knowledge levels
-knowledge_summary <- table(knowledge$knowledge_level)
-
-# Display the summary table
-print(knowledge_summary)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#knowledge
 
 library(dplyr)
 knowledge <-data1 |> select( 12:23) |> mutate(across( everything(), ~
@@ -109,7 +63,7 @@ knowledge <-data1 |> select( 12:23) |> mutate(across( everything(), ~
     knowledge__M >= 50 & knowledge__M < 80 ~ "Modarate",
     knowledge__M >= 80 ~ "Good",
     TRUE ~ NA_character_
-  ))
+  )) 
 
 
 #Attitude
@@ -186,19 +140,6 @@ summary_table |> as_gt()
 
 
 
-##Table-4 try
-
-#table 4
-install.packages("broom.helpers")
-library(broom.helpers)
-knowledge
-data1 |> select(1:9, knowledge_M ) |>
-  tbl_uvregression(
-    method = glm,
-    method.args = list(family = binomial),
-    y = Knowledge_of_antibiotics,
-    exponentiate = T) |> 
-  bold_p( t= 0.05)
 
 
 
@@ -207,28 +148,3 @@ data1 |> select(1:9, knowledge_M ) |>
 
 
 
-
-
-
-
-
-
-
-
-# table-4 + export
-str(data1)
-data1 $`Parent’s age (years)`<-as.factor(data1 $`Parent’s age (years)`)
-data1 $`Parent’s sex`<- as.factor(data1 $`Parent’s sex`)
-data1 $`Parent’s education level` <- as.factor(data1 $`Parent’s education level`)
-data1 $`Employment status`<- as.factor(data1 $`Employment status`)
-data1$`Family type` <- as.factor(data1$`Family type`)
-data1 $`Your average household income per month (BDT)` <- as.factor(data1 $`Your average household income per month (BDT)`)
-data $`Child’s sex`<- as.factor(data $`Child’s sex`)
-data1$`Child’s age (years)` <- as.factor(data1$`Child’s age (years)`)
-data1$`Number of children`<- as.factor(data1$`Number of children`)
-
-
-data1 |>  select(1:9,`Knowledge of antibiotics`) |> 
-  tbl_uvregression(method = glm,
-                   method.args = list(family= binomial),
-                   y=`Knowledge of antibiotics`,exponentiate = TRUE)
